@@ -14,7 +14,7 @@ distribuída como marketplace (`claude-documentation`).
 A partir do repositório no GitHub:
 
 ```bash
-claude plugin marketplace add claudesolutions/Claude.Skills.Documentation
+claude plugin marketplace add getsandom/Claude.Skills.Documentation
 claude plugin install repo-docs@claude-documentation
 ```
 
