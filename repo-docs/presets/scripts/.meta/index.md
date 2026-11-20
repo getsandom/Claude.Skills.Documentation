@@ -1,4 +1,4 @@
-# Índice: scripts
+# Index: scripts
 
-- **Atualizado em:** {{DATA}}
+- **Updated:** {{DATE}}
 

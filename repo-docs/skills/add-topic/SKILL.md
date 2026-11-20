@@ -1,99 +1,101 @@
 ---
 name: add-topic
-description: Adiciona, de forma guiada, um tópico ou subtópico à documentação repo-docs do repositório atual, a partir de um preset ou definido do zero.
+description: Adds, in a guided way, a topic or subtopic to the repo-docs documentation of the current repository, from a preset or defined from scratch.
 disable-model-invocation: true
-argument-hint: "[nome-do-topico]"
+argument-hint: "[topic-name]"
 ---
 
 # repo-docs: add-topic
 
-Adiciona um tópico (ou subtópico) a uma documentação já criada por
+Adds a topic (or subtopic) to a documentation already created by
 `/repo-docs:init`.
 
-Recursos do plugin:
+Plugin resources:
 
-- Presets: `${CLAUDE_PLUGIN_ROOT}/presets/` (catálogo em
-  `${CLAUDE_PLUGIN_ROOT}/presets/catalogo.md`).
-- Verificação: `${CLAUDE_PLUGIN_ROOT}/skills/audit/scripts/audit.sh` e `audit.ps1`.
+- Presets: `${CLAUDE_PLUGIN_ROOT}/presets/` (catalog in
+  `${CLAUDE_PLUGIN_ROOT}/presets/catalog.md`).
+- Verification: `${CLAUDE_PLUGIN_ROOT}/skills/audit/scripts/audit.sh` and `audit.ps1`.
 
-## 1. Contexto
+## 1. Context
 
-1. Confirme que `docs/.meta/regras.md` existe; senão, sugira `/repo-docs:init` e
-   pare.
-2. Leia `docs/.meta/regras.md` (estrutura de tópico, formato de índice, tabela de
-   prefixos) e `docs/.meta/index.md`. A pasta `.meta/` pode ser ignorada por buscas
-   com Glob/Grep: leia os arquivos pelo caminho.
-3. Liste os tópicos existentes (pastas sob `docs/` com `.meta/`).
-4. Se a seção Convenções de `docs/.meta/regras.md` não tiver o item "Mensagens de
-   commit" (documentação criada antes dessa regra), faça a pergunta **Padrão de
-   commits** do `init` e, com a aprovação do usuário, acrescente o item ao fim da
-   seção, no formato do catálogo.
+1. Confirm that `docs/.meta/rules.md` exists; otherwise, suggest `/repo-docs:init`
+   and stop.
+2. Read `docs/.meta/rules.md` (topic structure, index format, prefix table) and
+   `docs/.meta/index.md`. The `.meta/` folder may be ignored by Glob/Grep searches:
+   read the files by their path.
+3. List the existing topics (folders under `docs/` with `.meta/`).
+4. If the Conventions section of `docs/.meta/rules.md` does not have the "Commit
+   messages" item (documentation created before that rule), ask the **Commit
+   pattern** question from `init` and, with the user's approval, add the item at the
+   end of the section, in the catalog format.
 
-## 2. Entrevista
+## 2. Interview
 
-Um item por vez, esperando cada resposta. O nome sugerido é `$ARGUMENTS`, se
-informado.
+One item at a time, waiting for each answer. The suggested name is `$ARGUMENTS`, if
+given.
 
-1. **Origem**: um preset do catálogo ainda não usado, ou um tópico novo.
-2. **Pai**: a raiz `docs/` ou um tópico existente (para criar um subtópico).
-3. Para preset: os subtópicos opcionais, como no `init`. Pule para a etapa 3.
-4. Para tópico novo:
-   1. **Nome** da pasta, em kebab-case sem acentos, único no pai.
-   2. **Propósito**: o que o tópico reúne e por que existe (vira o `README.md` e a
-      descrição no índice do pai).
-   3. **O que registrar** e o que fica em outros tópicos.
-   4. **Identificador**: nenhum, prefixo próprio (2 a 4 letras maiúsculas, ausente
-      da tabela de prefixos e de todos os `.meta/regras.md`) ou, para subtópico, o
-      prefixo do pai com numeração compartilhada.
-   5. **Nome do arquivo**: padrão dos documentos (com identificador, sempre
-      `PRE_NNN-titulo-curto.md`) ou, para documentos compostos de vários arquivos,
-      um documento em pasta (`PRE_NNN-titulo-curto/`, com arquivos internos
-      `PRE_NNN.XX-titulo-curto.md`), conforme a seção Documentos em pasta das
-      regras gerais. Neste caso, levante também o modelo do `README.md` da pasta,
-      o dos arquivos internos e o das regras da pasta (Identificador
-      `` `PRE_NNN.XX` ``), como no preset `tarefas`.
-   6. **Modelo**: se os documentos terão estrutura fixa; se sim, levante com o
-      usuário os campos de cabeçalho e as seções.
-   7. **Descrição no índice**: o que a linha de cada documento deve dizer.
-   8. **Ao encerrar**: seção Encerrados com quais desfechos; mover para um
-      subtópico (como pendências resolvidas); remover sem registro; ou não se
-      aplica.
-   9. **Ciclo de vida**: regras adicionais (estados, rastreabilidade, revisões).
+1. **Origin**: a catalog preset not yet used, or a new topic.
+2. **Parent**: the root `docs/` or an existing topic (to create a subtopic).
+3. For a preset: the optional subtopics, as in `init`. Skip to step 3.
+4. For a new topic:
+   1. **Name** of the folder, in kebab-case without accents, unique in the parent.
+   2. **Purpose**: what the topic gathers and why it exists (becomes the
+      `README.md` and the description in the parent index).
+   3. **What to record** and what belongs in other topics.
+   4. **Identifier**: none, its own prefix (2 to 4 uppercase letters, absent from
+      the prefix table and from all `.meta/rules.md`) or, for a subtopic, the
+      parent's prefix with shared numbering.
+   5. **File name**: pattern of the documents (with an identifier, always
+      `PRE_NNN-short-title.md`) or, for documents made of several files, a folder
+      document (`PRE_NNN-short-title/`, with inner files
+      `PRE_NNN.XX-short-title.md`), according to the Folder documents section of
+      the general rules. In this case, also gather the template for the folder's
+      `README.md`, the one for the inner files and the one for the folder rules
+      (Identifier `` `PRE_NNN.XX` ``), as in the `tasks` preset.
+   6. **Template**: whether the documents will have a fixed structure; if so,
+      gather the header fields and the sections with the user.
+   7. **Index description**: what each document's line must say.
+   8. **On closing**: Closed section with which outcomes; move to a subtopic (like
+      resolved issues); remove without record; or not applicable.
+   9. **Lifecycle**: additional rules (states, traceability, reviews).
 
-Mostre os arquivos que serão criados e alterados e peça confirmação antes de gravar.
+Show the files that will be created and changed and ask for confirmation before
+writing.
 
-## 3. Criação
+## 3. Creation
 
-1. Preset: copie a pasta do preset para o pai, com `.meta/`, substituindo
-   `{{PROJETO}}` (nome do projeto, tirado do título de `docs/README.md`) e `{{DATA}}`
-   (hoje, `DD/MM/AAAA`).
-2. Tópico novo: crie, seguindo o formato dos presets (use
-   `${CLAUDE_PLUGIN_ROOT}/presets/decisoes/` como referência):
-   - `README.md`: título, propósito e a seção "Por onde começar" com links para o
-     índice e as regras;
-   - `.meta/index.md`: `# Índice: <nome>` e `- **Atualizado em:** DD/MM/AAAA`;
-   - `.meta/regras.md`: `# Regras: <nome>`, o bloco de campos fixos na ordem das
-     regras gerais (Identificador, Modelo, Nome do arquivo, Descrição no índice, Ao
-     encerrar, Subtópicos), seguido de O que registrar e Ciclo de vida;
-   - `.meta/modelo.md`, se houver modelo: `# Modelo de <documento>` e a estrutura
-     num bloco de código `markdown`; para documento em pasta, um bloco por modelo
-     (use `${CLAUDE_PLUGIN_ROOT}/presets/tarefas/.meta/modelo.md` como referência).
-3. No pai:
-   - acrescente o item do tópico no `.meta/index.md`, em ordem alfabética, e
-     atualize a data;
-   - atualize o campo **Subtópicos** do `.meta/regras.md`, se o pai não for a raiz;
-   - revise o `README.md`, se ele destacar os subtópicos.
-4. Se o tópico tiver prefixo próprio, acrescente a linha na tabela de prefixos de
-   `docs/.meta/regras.md`, em ordem alfabética.
-5. Se existir `docs/historico/`, registre a criação no arquivo do dia, conforme as
-   regras do histórico.
+1. Preset: copy the preset folder into the parent, with `.meta/`, replacing
+   `{{PROJECT}}` (project name, taken from the title of `docs/README.md`) and
+   `{{DATE}}` (today, `YYYY-MM-DD`).
+2. New topic: create, following the format of the presets (use
+   `${CLAUDE_PLUGIN_ROOT}/presets/decisions/` as a reference):
+   - `README.md`: title, purpose and the "Where to start" section with links to the
+     index and the rules;
+   - `.meta/index.md`: `# Index: <name>` and `- **Updated:** YYYY-MM-DD`;
+   - `.meta/rules.md`: `# Rules: <name>`, the block of fixed fields in the order of
+     the general rules (Identifier, Template, File name, Index description, On
+     closing, Subtopics), followed by What to record and Lifecycle;
+   - `.meta/template.md`, if there is a template: `# <Document> template` and the
+     structure in a `markdown` code block; for a folder document, one block per
+     template (use `${CLAUDE_PLUGIN_ROOT}/presets/tasks/.meta/template.md` as a
+     reference).
+3. In the parent:
+   - add the topic item to `.meta/index.md`, in alphabetical order, and update the
+     date;
+   - update the **Subtopics** field of `.meta/rules.md`, if the parent is not the
+     root;
+   - review the `README.md`, if it highlights the subtopics.
+4. If the topic has its own prefix, add the line to the prefix table of
+   `docs/.meta/rules.md`, in alphabetical order.
+5. If `docs/history/` exists, record the creation in the file of the day, according
+   to the history rules.
 
-## 4. Verificação
+## 4. Verification
 
-Execute a verificação mecânica a partir da raiz do repositório:
+Run the mechanical verification from the repository root:
 
 - Windows: `powershell -NoProfile -ExecutionPolicy Bypass -File "${CLAUDE_PLUGIN_ROOT}/skills/audit/scripts/audit.ps1" docs`
-- Linux/macOS (ou Git Bash): `bash "${CLAUDE_PLUGIN_ROOT}/skills/audit/scripts/audit.sh" docs`
+- Linux/macOS (or Git Bash): `bash "${CLAUDE_PLUGIN_ROOT}/skills/audit/scripts/audit.sh" docs`
 
-Corrija o que for apontado e informe os arquivos criados e alterados. Não faça
-commit sem pedido.
+Fix whatever is reported and report the files created and changed. Do not commit
+without being asked.

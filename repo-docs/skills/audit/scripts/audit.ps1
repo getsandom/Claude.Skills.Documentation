@@ -1,23 +1,23 @@
 ﻿<#
 .SYNOPSIS
-    Verificação mecânica de uma documentação na estrutura repo-docs. Só leitura.
+    Mechanical check of a documentation tree in the repo-docs structure. Read-only.
 
 .DESCRIPTION
-    Sem -NextId, verifica a estrutura e imprime uma linha por problema,
-    "ERRO|AVISO <caminho>: <mensagem>", com o caminho relativo à pasta de
-    documentação, em ordem ordinal, seguida de "Resumo: N erro(s), M aviso(s)."
-    Com -NextId PRE, imprime o próximo identificador livre do prefixo informado; com
-    -NextId PRE_NNN, o próximo sub-identificador PRE_NNN.XX do documento em pasta.
-    Código de saída: 0 sem erros, 1 com erros, 2 em uso inválido ou pasta inexistente.
-    A saída é idêntica à de audit.sh para a mesma árvore.
+    Without -NextId, checks the structure and prints one line per problem,
+    "ERROR|WARNING <path>: <message>", with the path relative to the
+    documentation folder, in ordinal order, followed by "Summary: N error(s), M warning(s)."
+    With -NextId PRE, prints the next free identifier for the given prefix; with
+    -NextId PRE_NNN, the next sub-identifier PRE_NNN.XX of the folder document.
+    Exit code: 0 without errors, 1 with errors, 2 on invalid usage or missing folder.
+    The output is identical to that of audit.sh for the same tree.
 
 .PARAMETER Docs
-    Pasta de documentação. Padrão: ./docs.
+    Documentation folder. Default: ./docs.
 
 .PARAMETER NextId
-    Prefixo (ex.: DEC) cujo próximo identificador livre deve ser impresso, ou
-    identificador de documento em pasta (ex.: TAR_001) cujo próximo
-    sub-identificador deve ser impresso.
+    Prefix (e.g. DEC) whose next free identifier should be printed, or
+    identifier of a folder document (e.g. TSK_001) whose next
+    sub-identifier should be printed.
 #>
 param(
     [Parameter(Position = 0)] [string] $Docs = 'docs',
@@ -29,7 +29,7 @@ $ErrorActionPreference = 'Stop'
 $OutputEncoding = [Console]::OutputEncoding
 
 if (-not (Test-Path -LiteralPath $Docs -PathType Container)) {
-    [Console]::Error.WriteLine("Pasta de documentação não encontrada: $Docs")
+    [Console]::Error.WriteLine("Documentation folder not found: $Docs")
     exit 2
 }
 $root = (Resolve-Path -LiteralPath $Docs).ProviderPath.TrimEnd('\', '/')
@@ -49,12 +49,12 @@ function Read-Lines([string] $path) {
 
 $ordinal = [System.StringComparer]::Ordinal
 
-# Próximo identificador livre: maior número usado em nomes de arquivo ou de pasta ou
-# em qualquer índice, mais um. Para PRE_NNN, o maior XX dos sub-identificadores
-# PRE_NNN.XX em nomes de arquivo ou em qualquer índice, mais um.
+# Next free identifier: highest number used in file or folder names or in any
+# index, plus one. For PRE_NNN, the highest XX of the sub-identifiers PRE_NNN.XX
+# in file names or in any index, plus one.
 if ($NextId -ne '') {
     if ($NextId -cnotmatch '^[A-Z][A-Z0-9]*(_[0-9]{3})?$') {
-        [Console]::Error.WriteLine("Prefixo inválido: $NextId")
+        [Console]::Error.WriteLine("Invalid prefix: $NextId")
         exit 2
     }
     $sub = $NextId.Contains('_')
@@ -91,7 +91,7 @@ function Add-Report([string] $level, [string] $path, [string] $msg) {
     $out.Add("$level ${path}: $msg")
 }
 
-# Tópicos: a raiz e toda subpasta que não comece por ponto, fora de .meta.
+# Topics: the root and every subfolder that does not start with a dot, outside .meta.
 $topics = New-Object System.Collections.Generic.List[string]
 $stack = New-Object System.Collections.Generic.Stack[string]
 $stack.Push($root)
@@ -105,9 +105,9 @@ foreach ($T in $topics) {
     $rt = Get-Rel $T
     if ($rt -ne '') { $rt = "$rt/" }
 
-    foreach ($f in @('README.md', '.meta/index.md', '.meta/regras.md')) {
+    foreach ($f in @('README.md', '.meta/index.md', '.meta/rules.md')) {
         if (-not (Test-Path -LiteralPath (Join-Path $T $f) -PathType Leaf)) {
-            Add-Report 'ERRO' "$rt$f" 'arquivo obrigatório ausente'
+            Add-Report 'ERROR' "$rt$f" 'required file missing'
         }
     }
 
@@ -129,13 +129,13 @@ foreach ($T in $topics) {
         $items = New-Object System.Collections.Generic.List[string]
         $enc = $false
         foreach ($line in (Read-Lines $indexPath)) {
-            if ($line -cmatch '^## Encerrados\s*$') { $enc = $true; continue }
+            if ($line -cmatch '^## Closed\s*$') { $enc = $true; continue }
             if ($line.StartsWith('## ')) { $enc = $false }
             if (-not $enc -and $line -cmatch '^- \[([^\]]+)\]\(([^)]+)\)') {
                 $text = $Matches[1]; $target = $Matches[2]
                 $items.Add($text)
                 if ($target -cne "../$text") {
-                    Add-Report 'ERRO' "$rt.meta/index.md" "o link do item $text deveria apontar para ../$text"
+                    Add-Report 'ERROR' "$rt.meta/index.md" "the link of item $text should point to ../$text"
                 }
             }
             if ($enc -and $line -cmatch '^- `([^`]+)`') {
@@ -148,34 +148,34 @@ foreach ($T in $topics) {
         $seen = New-Object 'System.Collections.Generic.HashSet[string]' $ordinal
         $dups = New-Object 'System.Collections.Generic.SortedSet[string]' $ordinal
         foreach ($i in $items) { if (-not $seen.Add($i)) { [void]$dups.Add($i) } }
-        foreach ($d in $dups) { Add-Report 'ERRO' "$rt.meta/index.md" "item repetido: $d" }
+        foreach ($d in $dups) { Add-Report 'ERROR' "$rt.meta/index.md" "duplicate item: $d" }
 
         $actualSet = New-Object 'System.Collections.Generic.HashSet[string]' $ordinal
         foreach ($a in $actual) { [void]$actualSet.Add($a) }
         foreach ($i in $seen) {
-            if (-not $actualSet.Contains($i)) { Add-Report 'ERRO' "$rt.meta/index.md" "lista $i, que não existe" }
+            if (-not $actualSet.Contains($i)) { Add-Report 'ERROR' "$rt.meta/index.md" "lists $i, which does not exist" }
         }
         foreach ($a in $actualSet) {
-            if (-not $seen.Contains($a)) { Add-Report 'ERRO' "$rt.meta/index.md" "não lista $a" }
+            if (-not $seen.Contains($a)) { Add-Report 'ERROR' "$rt.meta/index.md" "does not list $a" }
         }
 
         $sorted = $items.ToArray()
         [Array]::Sort($sorted, $ordinal)
         if (($sorted -join "`n") -cne ($items.ToArray() -join "`n")) {
-            Add-Report 'AVISO' "$rt.meta/index.md" 'itens fora da ordem alfabética'
+            Add-Report 'WARNING' "$rt.meta/index.md" 'items out of alphabetical order'
         }
     }
 
-    # Padrão de nome e título nos tópicos com identificador. Com `PRE_NNN`, os
-    # arquivos e as pastas (documentos em pasta) que começam pelo prefixo; com
-    # `PRE_NNN.XX`, o tópico é um documento em pasta e os arquivos que começam pelo
-    # prefixo são os internos numerados (os demais são de apoio).
-    $rulesPath = Join-Path $T '.meta/regras.md'
+    # Name pattern and title in topics with an identifier. With `PRE_NNN`, the
+    # files and folders (folder documents) that start with the prefix; with
+    # `PRE_NNN.XX`, the topic is a folder document and the files that start with the
+    # prefix are the numbered inner files (the others are supporting files).
+    $rulesPath = Join-Path $T '.meta/rules.md'
     if (Test-Path -LiteralPath $rulesPath -PathType Leaf) {
         $prefix = ''
         $subMode = $false
         foreach ($line in (Read-Lines $rulesPath)) {
-            if ($line.StartsWith('- **Identificador:**')) {
+            if ($line.StartsWith('- **Identifier:**')) {
                 if ($line -cmatch '^[^`]*`([A-Z][A-Z0-9]*)_NNN(\.XX)?`') {
                     $prefix = $Matches[1]
                     $subMode = $Matches.ContainsKey(2)
@@ -190,7 +190,7 @@ foreach ($T in $topics) {
                 if ($c.PSIsContainer) {
                     if (-not $c.Name.StartsWith("${prefix}_", [System.StringComparison]::Ordinal)) { continue }
                     if ($c.Name -cnotmatch "^${ep}_[0-9]{3}-[a-z0-9-]+$") {
-                        Add-Report 'ERRO' "$rt$($c.Name)/" "nome fora do padrão ${prefix}_NNN-titulo/"
+                        Add-Report 'ERROR' "$rt$($c.Name)/" "name does not match ${prefix}_NNN-title/"
                         continue
                     }
                     $readme = Join-Path $c.FullName 'README.md'
@@ -198,7 +198,7 @@ foreach ($T in $topics) {
                     $file = $readme; $shown = "$rt$($c.Name)/README.md"
                 } else {
                     if ($c.Name -cnotmatch "^${ep}_[0-9]{3}-[a-z0-9-]+\.md$") {
-                        Add-Report 'ERRO' "$rt$($c.Name)" "nome fora do padrão ${prefix}_NNN-titulo.md"
+                        Add-Report 'ERROR' "$rt$($c.Name)" "name does not match ${prefix}_NNN-title.md"
                         continue
                     }
                     $file = $c.FullName; $shown = "$rt$($c.Name)"
@@ -208,21 +208,21 @@ foreach ($T in $topics) {
                 $lines = @(Read-Lines $file)
                 if ($lines.Count -gt 0) { $first = $lines[0] }
                 if (-not $first.StartsWith("# ${id}:", [System.StringComparison]::Ordinal)) {
-                    Add-Report 'ERRO' $shown "o título deveria começar por '# ${id}:'"
+                    Add-Report 'ERROR' $shown "the title should start with '# ${id}:'"
                 }
             }
         }
         if ($prefix -ne '' -and $subMode) {
             $dirName = Split-Path -Leaf $T
             if ($dirName -cnotmatch "^${ep}_([0-9]{3})-") {
-                Add-Report 'ERRO' "$rt.meta/regras.md" "identificador ${prefix}_NNN.XX em pasta fora do padrão ${prefix}_NNN-titulo/"
+                Add-Report 'ERROR' "$rt.meta/rules.md" "identifier ${prefix}_NNN.XX in a folder that does not match ${prefix}_NNN-title/"
             } else {
                 $num = $Matches[1]
                 foreach ($c in $children) {
                     if ($c.PSIsContainer -or $c.Name -eq 'README.md') { continue }
                     if (-not $c.Name.StartsWith("${prefix}_", [System.StringComparison]::Ordinal)) { continue }
                     if ($c.Name -cnotmatch "^${ep}_${num}\.[0-9]{2}-[a-z0-9-]+\.md$") {
-                        Add-Report 'ERRO' "$rt$($c.Name)" "nome fora do padrão ${prefix}_${num}.XX-titulo.md"
+                        Add-Report 'ERROR' "$rt$($c.Name)" "name does not match ${prefix}_${num}.XX-title.md"
                         continue
                     }
                     $id = $c.Name.Substring(0, $c.Name.IndexOf('-'))
@@ -230,7 +230,7 @@ foreach ($T in $topics) {
                     $lines = @(Read-Lines $c.FullName)
                     if ($lines.Count -gt 0) { $first = $lines[0] }
                     if (-not $first.StartsWith("# ${id}:", [System.StringComparison]::Ordinal)) {
-                        Add-Report 'ERRO' "$rt$($c.Name)" "o título deveria começar por '# ${id}:'"
+                        Add-Report 'ERROR' "$rt$($c.Name)" "the title should start with '# ${id}:'"
                     }
                 }
             }
@@ -238,7 +238,7 @@ foreach ($T in $topics) {
     }
 }
 
-# Identificadores repetidos entre arquivos.
+# Identifiers repeated across files.
 $byId = @{}
 foreach ($e in $ids) {
     if (-not $byId.ContainsKey($e.Id)) { $byId[$e.Id] = New-Object System.Collections.Generic.List[string] }
@@ -249,22 +249,22 @@ foreach ($k in $byId.Keys) {
     if ($paths.Count -gt 1) {
         [Array]::Sort($paths, $ordinal)
         $rest = ($paths | Select-Object -Skip 1) -join ', '
-        Add-Report 'ERRO' $paths[0] "identificador $k também usado em $rest"
+        Add-Report 'ERROR' $paths[0] "identifier $k also used in $rest"
     }
 }
 
-# Identificadores encerrados que voltaram a existir.
+# Closed identifiers that exist again.
 $closedSeen = New-Object 'System.Collections.Generic.HashSet[string]' $ordinal
 foreach ($c in $closed) {
     if (-not $closedSeen.Add("$($c.Id)`t$($c.Where)")) { continue }
     if ($byId.ContainsKey($c.Id)) {
         foreach ($p in $byId[$c.Id]) {
-            Add-Report 'ERRO' $c.Where "identificador encerrado $($c.Id) reutilizado em $p"
+            Add-Report 'ERROR' $c.Where "closed identifier $($c.Id) reused in $p"
         }
     }
 }
 
-# Links relativos quebrados, fora de blocos e trechos de código.
+# Broken relative links, outside code blocks and code spans.
 $mdFiles = @(Get-ChildItem -LiteralPath $root -Recurse -Force -File -Filter '*.md')
 foreach ($file in $mdFiles) {
     $code = $false
@@ -281,7 +281,7 @@ foreach ($file in $mdFiles) {
             $p = $p.Replace('%20', ' ')
             if ($p -eq '') { continue }
             if (-not (Test-Path -LiteralPath (Join-Path $file.DirectoryName $p))) {
-                Add-Report 'ERRO' (Get-Rel $file.FullName) "link quebrado: $t"
+                Add-Report 'ERROR' (Get-Rel $file.FullName) "broken link: $t"
             }
         }
     }
@@ -290,7 +290,7 @@ foreach ($file in $mdFiles) {
 $final = $out.ToArray()
 [Array]::Sort($final, $ordinal)
 foreach ($line in $final) { $line }
-$errors = @($final | Where-Object { $_.StartsWith('ERRO ') }).Count
-$warnings = @($final | Where-Object { $_.StartsWith('AVISO ') }).Count
-"Resumo: $errors erro(s), $warnings aviso(s)."
+$errors = @($final | Where-Object { $_.StartsWith('ERROR ') }).Count
+$warnings = @($final | Where-Object { $_.StartsWith('WARNING ') }).Count
+"Summary: $errors error(s), $warnings warning(s)."
 if ($errors -gt 0) { exit 1 } else { exit 0 }

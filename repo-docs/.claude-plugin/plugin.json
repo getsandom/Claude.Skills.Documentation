@@ -1,9 +1,9 @@
 {
 	"name": "repo-docs",
-	"version": "0.3.0",
-	"description": "Documentação embutida e versionada no repositório, organizada em tópicos com índice, regras e modelos.",
+	"version": "0.4.0",
+	"description": "Documentation embedded and versioned in the repository, organized in topics with index, rules and templates.",
 	"author": {
 		"name": "Claude"
 	},
-	"keywords": ["documentacao", "docs", "adr", "decisoes", "pendencias", "tarefas"]
+	"keywords": ["documentation", "docs", "adr", "decisions", "issues", "tasks"]
 }

@@ -1,0 +1,4 @@
+# Index: domain
+
+- **Updated:** {{DATE}}
+

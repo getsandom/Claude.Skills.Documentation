@@ -1,115 +1,118 @@
 ---
 name: init
-description: Cria a estrutura de documentação repo-docs (pasta docs/ organizada em tópicos com README.md e .meta/) no repositório atual, entrevistando o usuário sobre os tópicos desejados.
+description: Creates the repo-docs documentation structure (docs/ folder organized in topics with README.md and .meta/) in the current repository, interviewing the user about the desired topics.
 disable-model-invocation: true
-argument-hint: "[nome do projeto]"
+argument-hint: "[project name]"
 ---
 
 # repo-docs: init
 
-Cria `docs/` no repositório atual a partir dos presets do plugin, conforme as
-escolhas do usuário.
+Creates `docs/` in the current repository from the plugin presets, according to the
+user's choices.
 
-Recursos do plugin:
+Plugin resources:
 
-- Presets: `${CLAUDE_PLUGIN_ROOT}/presets/` (catálogo em
-  `${CLAUDE_PLUGIN_ROOT}/presets/catalogo.md`; leia-o antes de começar).
-- Verificação: `${CLAUDE_PLUGIN_ROOT}/skills/audit/scripts/audit.sh` e `audit.ps1`.
+- Presets: `${CLAUDE_PLUGIN_ROOT}/presets/` (catalog in
+  `${CLAUDE_PLUGIN_ROOT}/presets/catalog.md`; read it before starting).
+- Verification: `${CLAUDE_PLUGIN_ROOT}/skills/audit/scripts/audit.sh` and `audit.ps1`.
 
-## 1. Pré-condições
+## 1. Preconditions
 
-1. Identifique a raiz do repositório (`git rev-parse --show-toplevel`; sem git, o
-   diretório atual) e confirme com o usuário se houver dúvida.
-2. Se `docs/.meta/regras.md` existir, a estrutura já foi criada: informe e sugira
-   `/repo-docs:add-topic` ou `/repo-docs:audit`. Pare.
-3. Se `docs/` existir sem `docs/.meta/`, há documentação em outro formato: informe o
-   que existe e sugira `/repo-docs:migrate`, que inventaria e migra a documentação
-   existente. Pare; nunca sobrescreva nem mova arquivos sem aprovação explícita.
-4. Se houver outra documentação no repositório (ADRs, Markdown espalhado, seções
-   de decisão ou arquitetura no `README.md`), mencione ao final que
-   `/repo-docs:migrate` pode trazê-la para a nova estrutura.
+1. Identify the repository root (`git rev-parse --show-toplevel`; without git, the
+   current directory) and confirm with the user if in doubt.
+2. If `docs/.meta/rules.md` exists, the structure has already been created: report
+   it and suggest `/repo-docs:add-topic` or `/repo-docs:audit`. Stop.
+3. If `docs/` exists without `docs/.meta/`, there is documentation in another format:
+   report what exists and suggest `/repo-docs:migrate`, which inventories and
+   migrates the existing documentation. Stop; never overwrite or move files without
+   explicit approval.
+4. If there is other documentation in the repository (ADRs, scattered Markdown,
+   decision or architecture sections in the `README.md`), mention at the end that
+   `/repo-docs:migrate` can bring it into the new structure.
 
-## 2. Entrevista
+## 2. Interview
 
-Pergunte um item por vez (com AskUserQuestion, quando disponível), esperando cada
-resposta:
+Ask one item at a time (with AskUserQuestion, when available), waiting for each
+answer:
 
-1. **Nome do projeto**: `$ARGUMENTS`, se informado; senão, sugira o nome da pasta do
-   repositório.
-2. **Tópicos**: seleção múltipla entre os presets do catálogo, todos recomendados.
-   Informe as dependências do catálogo (por exemplo, `scripts` pressupõe `suporte`).
-3. **Subtópicos opcionais**: para cada tópico escolhido com subtópico opcional
-   (hoje, `arquitetura/dominio/`), pergunte se deve ser incluído. Subtópicos
-   obrigatórios (`pendencias/resolvidas/`, `requisitos/usuario/` e `sistema/`,
-   `tarefas/concluidas/`) são sempre copiados.
-4. **Glossário**: incluir `docs/glossario.md`?
-5. **Documentação no código**: incluir a regra de documentação no código autocontida
-   nas regras gerais?
-6. **Padrão de commits**: o padrão das mensagens de commit, que vai para as
-   Convenções das regras gerais. Leia as mensagens recentes
+1. **Project name**: `$ARGUMENTS`, if given; otherwise, suggest the name of the
+   repository folder.
+2. **Topics**: multiple selection among the catalog presets, all recommended.
+   Report the catalog dependencies (for example, `scripts` presupposes `support`).
+3. **Optional subtopics**: for each chosen topic with an optional subtopic
+   (currently, `architecture/domain/`), ask whether it should be included.
+   Mandatory subtopics (`issues/resolved/`, `requirements/user/` and `system/`,
+   `tasks/completed/`) are always copied.
+4. **Glossary**: include `docs/glossary.md`?
+5. **Documentation in the code**: include the self-contained code documentation rule
+   in the general rules?
+6. **Commit pattern**: the commit message pattern, which goes into the Conventions of
+   the general rules. Read the recent messages
    (`git log --no-merges --format=%s -n 50`):
-   - com histórico, descreva o padrão predominante com dois ou três exemplos reais e
-     proponha-o;
-   - sem histórico, sem padrão identificável ou sem preferência do usuário, proponha
-     Conventional Commits (`tipo(escopo): resumo`);
-   - o usuário pode definir outro padrão.
-7. **Tópicos próprios**: o usuário quer criar outros tópicos agora? Se sim, anote e
-   execute o fluxo de `/repo-docs:add-topic` para cada um depois da etapa 3.
+   - with history, describe the predominant pattern with two or three real examples
+     and propose it;
+   - without history, without an identifiable pattern or without a user preference,
+     propose Conventional Commits (`type(scope): summary`);
+   - the user may define another pattern.
+7. **Own topics**: does the user want to create other topics now? If so, note them
+   and run the `/repo-docs:add-topic` flow for each one after step 3.
 
-Em seguida, mostre a árvore resultante e peça confirmação antes de gravar.
+Then show the resulting tree and ask for confirmation before writing.
 
-## 3. Criação
+## 3. Creation
 
-1. Copie `presets/raiz/` (incluindo `.meta/`) para `docs/`, sem `glossario.md` se
-   ele não foi escolhido.
-2. Copie cada preset escolhido para `docs/<preset>/`, recursivamente, incluindo as
-   pastas `.meta/`; omita os subtópicos opcionais recusados.
-3. Em todos os arquivos copiados, substitua `{{PROJETO}}` pelo nome do projeto e
-   `{{DATA}}` pela data de hoje em `DD/MM/AAAA`. Confira que nenhum `{{` restou.
-4. Em `docs/.meta/regras.md`:
-   - preencha a tabela de prefixos com uma linha por tópico com identificador
-     (`| \`DEC\` | [decisoes](../decisoes/) |`), em ordem alfabética do prefixo;
-     subtópicos que compartilham o prefixo do pai não ganham linha;
-   - mantenha ou remova o bloco opcional de documentação no código conforme a
-     resposta (ver catálogo);
-   - substitua `{{COMMITS}}` pela descrição do padrão de commits escolhido, com um
-     exemplo (ver catálogo).
-5. Em `docs/.meta/index.md`, acrescente um item por tópico escolhido e, se for o
-   caso, pelo glossário, com a descrição do catálogo, em ordem alfabética do nome,
-   no formato `- [decisoes/](../decisoes/): Descrição.`
-6. Se `arquitetura/dominio/` foi incluído, acrescente o item dele em
-   `docs/arquitetura/.meta/index.md`; se foi recusado, verifique que nenhum arquivo
-   copiado o referencia.
-7. Se `historico` foi escolhido, crie `docs/historico/AAAA-MM-DD.md` com a entrada
-   de criação da estrutura (tipo Criação, documentos `docs/README.md` e os tópicos,
-   motivo "Criação da estrutura de documentação pelo repo-docs.") conforme
-   `docs/historico/.meta/modelo.md`, e o item correspondente no índice do histórico.
-   Datas e horas vêm do relógio do sistema (`date` no bash, `Get-Date` no
-   PowerShell), nunca estimadas.
+1. Copy `presets/root/` (including `.meta/`) to `docs/`, without `glossary.md` if it
+   was not chosen.
+2. Copy each chosen preset to `docs/<preset>/`, recursively, including the `.meta/`
+   folders; omit the declined optional subtopics.
+3. In all copied files, replace `{{PROJECT}}` with the project name and `{{DATE}}`
+   with today's date in `YYYY-MM-DD`. Check that no `{{` remains.
+4. In `docs/.meta/rules.md`:
+   - fill in the prefix table with one line per topic with an identifier
+     (`| \`DEC\` | [decisions](../decisions/) |`), in alphabetical order of the
+     prefix; subtopics that share the parent's prefix do not get a line;
+   - keep or remove the optional code documentation block according to the answer
+     (see catalog);
+   - replace `{{COMMITS}}` with the description of the chosen commit pattern, with
+     an example (see catalog).
+5. In `docs/.meta/index.md`, add one item per chosen topic and, if applicable, for
+   the glossary, with the catalog description, in alphabetical order of the name,
+   in the format `- [decisions/](../decisions/): Description.`
+6. If `architecture/domain/` was included, add its item to
+   `docs/architecture/.meta/index.md`; if it was declined, check that no copied file
+   references it.
+7. If `history` was chosen, create `docs/history/YYYY-MM-DD.md` with the entry for
+   the creation of the structure (type Creation, documents `docs/README.md` and the
+   topics, reason "Creation of the documentation structure by repo-docs.")
+   according to `docs/history/.meta/template.md`, and the corresponding item in the
+   history index. Dates and times come from the system clock (`date` in bash,
+   `Get-Date` in PowerShell), never estimated.
 
 ## 4. CLAUDE.md
 
-Proponha o trecho abaixo para o `CLAUDE.md` da raiz do repositório (criando o arquivo
-se não existir), mostre-o e grave só com aprovação explícita. Se já houver uma seção
-sobre documentação, proponha a mesclagem em vez de duplicar.
+Propose the excerpt below for the `CLAUDE.md` at the repository root (creating the
+file if it does not exist), show it and write it only with explicit approval. If
+there is already a section about documentation, propose merging instead of
+duplicating.
 
 ```markdown
-## Documentação (`docs/`)
+## Documentation (`docs/`)
 
-A documentação segue a estrutura repo-docs: cada tópico é uma pasta com `README.md`
-(apresentação), documentos de conteúdo e `.meta/` (`index.md`, `regras.md` e, quando
-houver, `modelo.md`). Antes de criar ou alterar documentos, leia `docs/README.md`,
-`docs/.meta/regras.md` e o `.meta/regras.md` do tópico; a pasta `.meta/` é oculta
-para algumas buscas, então leia-a pelo caminho. Mantenha o índice do tópico e o
-histórico atualizados.
+The documentation follows the repo-docs structure: each topic is a folder with
+`README.md` (introduction), content documents and `.meta/` (`index.md`, `rules.md`
+and, when there is one, `template.md`). Before creating or changing documents, read
+`docs/README.md`, `docs/.meta/rules.md` and the topic's `.meta/rules.md`; the
+`.meta/` folder is hidden from some searches, so read it by its path. Keep the topic
+index and the history up to date.
 ```
 
-## 5. Verificação
+## 5. Verification
 
-Execute a verificação mecânica a partir da raiz do repositório e mostre o resultado:
+Run the mechanical verification from the repository root and show the result:
 
 - Windows: `powershell -NoProfile -ExecutionPolicy Bypass -File "${CLAUDE_PLUGIN_ROOT}/skills/audit/scripts/audit.ps1" docs`
-- Linux/macOS (ou Git Bash): `bash "${CLAUDE_PLUGIN_ROOT}/skills/audit/scripts/audit.sh" docs`
+- Linux/macOS (or Git Bash): `bash "${CLAUDE_PLUGIN_ROOT}/skills/audit/scripts/audit.sh" docs`
 
-O resultado esperado é `Resumo: 0 erro(s), 0 aviso(s).`. Corrija o que for apontado
-antes de concluir e informe os arquivos criados. Não faça commit sem pedido.
+The expected result is `Summary: 0 error(s), 0 warning(s).`. Fix whatever is
+reported before finishing and report the files created. Do not commit without being
+asked.

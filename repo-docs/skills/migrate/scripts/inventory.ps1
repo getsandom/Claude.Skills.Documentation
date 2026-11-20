@@ -1,26 +1,26 @@
 ﻿<#
 .SYNOPSIS
-    Inventário de documentação, pendências no código e referências, para a migração
-    para a estrutura repo-docs. Só leitura.
+    Inventory of documentation, pending items in code and references, for the
+    migration to the repo-docs structure. Read-only.
 
 .DESCRIPTION
-    Executado a partir da raiz do repositório, em um dos modos:
-    -Markdown  Documentos de texto (.md, .markdown, .adoc, .rst) fora da documentação
-               já estruturada; uma linha "MD <caminho> <linhas> <título>".
-    -Todos     Ocorrências de TODO e FIXME (palavra inteira, maiúsculas) nos arquivos
-               informados ou, sem arquivos, em todos os arquivos do repositório; uma
-               linha "TODO <caminho>:<linha>: <texto>".
-    -Refs      Ocorrências literais do padrão fora de Docs e de Docs-legado; uma linha
-               "REF <caminho>:<linha>: <texto>".
-    Docs só é excluída de -Markdown e -Todos quando já está estruturada
-    (Docs/.meta/regras.md existe). Pastas .git, node_modules, bin e obj são sempre
-    ignoradas, assim como arquivos binários. A lista do repositório vem do git
-    (rastreados e não rastreados não ignorados) ou, fora de um repositório git, de
-    todos os arquivos. Saída em ordem ordinal do caminho e numérica da linha.
-    Código de saída: 0, ou 2 em uso inválido. A saída é idêntica à de inventory.sh.
+    Run from the repository root, in one of the modes:
+    -Markdown  Text documents (.md, .markdown, .adoc, .rst) outside the already
+               structured documentation; one line "MD <path> <lines> <title>".
+    -Todos     Occurrences of TODO and FIXME (whole word, uppercase) in the given
+               files or, without files, in all repository files; one
+               line "TODO <path>:<line>: <text>".
+    -Refs      Literal occurrences of the pattern outside Docs and Docs-legacy; one line
+               "REF <path>:<line>: <text>".
+    Docs is only excluded from -Markdown and -Todos when it is already structured
+    (Docs/.meta/rules.md exists). The .git, node_modules, bin and obj folders are
+    always ignored, as are binary files. The repository list comes from git
+    (tracked, and untracked not ignored) or, outside a git repository, from
+    all files. Output in ordinal order of the path and numeric order of the line.
+    Exit code: 0, or 2 on invalid usage. The output is identical to that of inventory.sh.
 
 .PARAMETER Files
-    Arquivos a verificar no modo -Todos.
+    Files to check in -Todos mode.
 #>
 param(
     [switch] $Markdown,
@@ -36,14 +36,14 @@ $OutputEncoding = [Console]::OutputEncoding
 
 $modes = @($Markdown.IsPresent, $Todos.IsPresent, ($Refs -ne '')) | Where-Object { $_ }
 if (@($modes).Count -ne 1) {
-    [Console]::Error.WriteLine('Uso: inventory.ps1 -Markdown | -Todos [arquivo...] | -Refs PADRÃO [-Docs DIR]')
+    [Console]::Error.WriteLine('Usage: inventory.ps1 -Markdown | -Todos [file...] | -Refs PATTERN [-Docs DIR]')
     exit 2
 }
 
 $Docs = $Docs.Replace('\', '/')
 if ($Docs.StartsWith('./')) { $Docs = $Docs.Substring(2) }
 $Docs = $Docs.TrimEnd('/')
-$structured = Test-Path -LiteralPath (Join-Path $Docs '.meta/regras.md') -PathType Leaf
+$structured = Test-Path -LiteralPath (Join-Path $Docs '.meta/rules.md') -PathType Leaf
 $utf8 = New-Object System.Text.UTF8Encoding $false
 
 function Get-Norm([string] $p) {
@@ -59,7 +59,7 @@ function Test-Excluded([string] $p, [string] $kind) {
     }
     if ($kind -eq 'docs' -and $structured -and $p.StartsWith("$Docs/", [System.StringComparison]::Ordinal)) { return $true }
     if ($kind -eq 'refs' -and ($p.StartsWith("$Docs/", [System.StringComparison]::Ordinal) -or
-            $p.StartsWith("$Docs-legado/", [System.StringComparison]::Ordinal))) { return $true }
+            $p.StartsWith("$Docs-legacy/", [System.StringComparison]::Ordinal))) { return $true }
     return $false
 }
 

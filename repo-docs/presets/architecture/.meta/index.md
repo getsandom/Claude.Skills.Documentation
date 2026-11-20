@@ -1,0 +1,4 @@
+# Index: architecture
+
+- **Updated:** {{DATE}}
+

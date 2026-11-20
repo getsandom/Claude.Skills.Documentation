@@ -1,35 +1,35 @@
 # Claude.Skills.Documentation
 
-Coleção de plugins do Claude Code para documentação de projetos da Claude,
-distribuída como marketplace (`claude-documentation`).
+Collection of Claude Code plugins for project documentation by Claude, distributed
+as a marketplace (`claude-documentation`).
 
 ## Plugins
 
-| Plugin | Origem da documentação | Comandos |
+| Plugin | Documentation source | Commands |
 |---|---|---|
-| [repo-docs](repo-docs/) | Pasta `docs/` versionada no próprio repositório | `init`, `add-topic`, `sync`, `audit`, `migrate` |
+| [repo-docs](repo-docs/) | `docs/` folder versioned in the repository itself | `init`, `add-topic`, `sync`, `audit`, `migrate` |
 
-## Instalação
+## Installation
 
-A partir do repositório no GitHub:
+From the repository on GitHub:
 
 ```bash
 claude plugin marketplace add getsandom/Claude.Skills.Documentation
 claude plugin install repo-docs@claude-documentation
 ```
 
-A partir de um clone local:
+From a local clone:
 
 ```bash
-claude plugin marketplace add <caminho-do-clone>
+claude plugin marketplace add <clone-path>
 claude plugin install repo-docs@claude-documentation
 ```
 
-Dentro de uma sessão, os equivalentes são `/plugin marketplace add <origem>` e
-`/plugin install repo-docs@claude-documentation`. Para testar alterações sem
-instalar: `claude --plugin-dir ./repo-docs`.
+Inside a session, the equivalents are `/plugin marketplace add <source>` and
+`/plugin install repo-docs@claude-documentation`. To test changes without
+installing: `claude --plugin-dir ./repo-docs`.
 
-## Padrões
+## Standards
 
-Os padrões para criar e manter plugins e skills nesta coleção, e as decisões que os
-fundamentam, estão em [GUIDELINES.md](GUIDELINES.md).
+The standards for creating and maintaining plugins and skills in this collection,
+and the decisions that support them, are in [GUIDELINES.md](GUIDELINES.md).

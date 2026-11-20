@@ -1,88 +1,87 @@
 # repo-docs
 
-Plugin do Claude Code para documentação embutida e versionada no próprio
-repositório, na pasta `docs/`, organizada em **tópicos**.
+Claude Code plugin for documentation embedded and versioned in the repository
+itself, in the `docs/` folder, organized in **topics**.
 
-## Modelo de tópico
+## Topic model
 
-Cada tópico é uma pasta:
+Each topic is a folder:
 
 ```
-topico/
-├─ README.md          apresentação: o porquê do tópico e os documentos mais relevantes
-├─ <documentos>       conteúdo
-├─ <subtopico>/       subtópico, com a mesma estrutura
+topic/
+├─ README.md          introduction: why the topic exists and the most relevant documents
+├─ <documents>        content
+├─ <subtopic>/        subtopic, with the same structure
 └─ .meta/
-   ├─ index.md        uma linha por documento e subtópico, para consulta rápida
-   ├─ regras.md       campos fixos (identificador, modelo, encerramento...) e regras em prosa
-   └─ modelo.md       (opcional) estrutura dos documentos
+   ├─ index.md        one line per document and subtopic, for quick lookup
+   ├─ rules.md        fixed fields (identifier, template, closing...) and prose rules
+   └─ template.md     (optional) structure of the documents
 ```
 
-A raiz `docs/` também é um tópico; `docs/.meta/regras.md` traz as regras que valem
-para todos (formato dos índices, identificadores `PRE_NNN`, histórico, convenções).
+The root `docs/` is also a topic; `docs/.meta/rules.md` holds the rules that apply
+to all of them (index format, `PRE_NNN` identifiers, history, conventions).
 
-## Comandos
+## Commands
 
-| Comando | O que faz |
+| Command | What it does |
 |---|---|
-| `/repo-docs:init [projeto]` | Cria `docs/` a partir dos presets, entrevistando o usuário sobre tópicos, subtópicos, glossário, regra de documentação no código, padrão de commits e o trecho do `CLAUDE.md`. |
-| `/repo-docs:add-topic [nome]` | Adiciona um tópico ou subtópico, a partir de um preset ou definido do zero. |
-| `/repo-docs:sync [operação]` | Cria, altera, encerra, move ou renomeia documentos aplicando as regras: próximo identificador, índice, README e histórico. Revisa os TODO/FIXME dos arquivos alterados contra as pendências; com `--todos-completo`, os do repositório inteiro. Também é acionado automaticamente quando a tarefa envolve documentos em `docs/`. |
-| `/repo-docs:audit [pasta]` | Verifica a documentação sem alterá-la: script mecânico e verificação de conteúdo. |
-| `/repo-docs:migrate [caminho]` | Localiza a documentação existente (`docs/` em outro formato, Markdown espalhado, seções de `README.md`/`CLAUDE.md`, TODO/FIXME) e a migra por inventário, plano e execução, com renumeração dos identificadores; o plano e depois o registro ficam em `docs/.meta/migracao.md`. |
+| `/repo-docs:init [project]` | Creates `docs/` from the presets, interviewing the user about topics, subtopics, glossary, code documentation rule, commit pattern and the `CLAUDE.md` excerpt. |
+| `/repo-docs:add-topic [name]` | Adds a topic or subtopic, from a preset or defined from scratch. |
+| `/repo-docs:sync [operation]` | Creates, changes, closes, moves or renames documents applying the rules: next identifier, index, README and history. Reviews the TODO/FIXME of the changed files against the issues; with `--all-todos`, those of the whole repository. It is also triggered automatically when the task involves documents in `docs/`. |
+| `/repo-docs:audit [dir]` | Checks the documentation without changing it: mechanical script and content verification. |
+| `/repo-docs:migrate [path]` | Locates the existing documentation (`docs/` in another format, scattered Markdown, sections of `README.md`/`CLAUDE.md`, TODO/FIXME) and migrates it through inventory, plan and execution, renumbering the identifiers; the plan and then the record stay in `docs/.meta/migration.md`. |
 
 ## Presets
 
-O catálogo está em [presets/catalogo.md](presets/catalogo.md).
+The catalog is in [presets/catalog.md](presets/catalog.md).
 
-| Preset | Identificador | Subtópicos |
+| Preset | Identifier | Subtopics |
 |---|---|---|
-| `requisitos` | — | `usuario/` (`RQU`), `sistema/` (`RQS`) |
-| `decisoes` | `DEC` | — |
-| `arquitetura` | — | `dominio/` (opcional) |
-| `melhorias` | `MEL` | — |
-| `pendencias` | `PEN` | `resolvidas/` |
-| `historico` | — | — |
-| `suporte` | — | — |
+| `requirements` | — | `user/` (`URQ`), `system/` (`SRQ`) |
+| `decisions` | `DEC` | — |
+| `architecture` | — | `domain/` (optional) |
+| `improvements` | `IMP` | — |
+| `issues` | `ISS` | `resolved/` |
+| `history` | — | — |
+| `support` | — | — |
 | `scripts` | — | — |
-| `tarefas` | `TAR` (passos `TAR_NNN.XX`) | `concluidas/` |
+| `tasks` | `TSK` (steps `TSK_NNN.XX`) | `completed/` |
 
-Opcionais da raiz: `glossario.md` e a regra de documentação no código autocontida.
-As regras gerais registram o padrão das mensagens de commit, escolhido no `init`.
+Root options: `glossary.md` and the self-contained code documentation rule. The
+general rules record the commit message pattern, chosen in `init`.
 
-`tarefas` usa documentos em pasta: cada tarefa é uma pasta `TAR_NNN-titulo/`, um
-subtópico com `README.md`, `.meta/` e um arquivo por passo (`TAR_NNN.XX-titulo.md`),
-planejado para execução em sequência por agentes de IA.
+`tasks` uses folder documents: each task is a folder `TSK_NNN-title/`, a subtopic
+with `README.md`, `.meta/` and one file per step (`TSK_NNN.XX-title.md`), planned
+for execution in sequence by AI agents.
 
-## Verificação mecânica
+## Mechanical verification
 
-`skills/audit/scripts/audit.ps1` e `skills/audit/scripts/audit.sh` produzem a mesma
-saída e podem ser usados fora do Claude Code, inclusive em CI:
+`skills/audit/scripts/audit.ps1` and `skills/audit/scripts/audit.sh` produce the
+same output and can be used outside Claude Code, including in CI:
 
 ```bash
 bash repo-docs/skills/audit/scripts/audit.sh docs
 bash repo-docs/skills/audit/scripts/audit.sh --next-id DEC docs
-bash repo-docs/skills/audit/scripts/audit.sh --next-id TAR_001 docs
+bash repo-docs/skills/audit/scripts/audit.sh --next-id TSK_001 docs
 ```
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File repo-docs/skills/audit/scripts/audit.ps1 docs
 powershell -NoProfile -ExecutionPolicy Bypass -File repo-docs/skills/audit/scripts/audit.ps1 -NextId DEC docs
-powershell -NoProfile -ExecutionPolicy Bypass -File repo-docs/skills/audit/scripts/audit.ps1 -NextId TAR_001 docs
+powershell -NoProfile -ExecutionPolicy Bypass -File repo-docs/skills/audit/scripts/audit.ps1 -NextId TSK_001 docs
 ```
 
-Com um prefixo (`DEC`), `--next-id` imprime o próximo identificador; com o
-identificador de um documento em pasta (`TAR_001`), o próximo sub-identificador
-(`TAR_001.03`).
+With a prefix (`DEC`), `--next-id` prints the next identifier; with the identifier
+of a folder document (`TSK_001`), the next sub-identifier (`TSK_001.03`).
 
-Código de saída: 0 sem erros, 1 com erros, 2 em uso inválido.
+Exit code: 0 without errors, 1 with errors, 2 on invalid usage.
 
-`skills/migrate/scripts/inventory.ps1` e `inventory.sh` listam, com a mesma saída,
-documentos de texto fora da documentação estruturada (`--markdown`), ocorrências de
-TODO/FIXME (`--todos [arquivos...]`) e referências literais fora de `docs/`
-(`--refs PADRÃO`).
+`skills/migrate/scripts/inventory.ps1` and `inventory.sh` list, with the same
+output, text documents outside the structured documentation (`--markdown`),
+TODO/FIXME occurrences (`--todos [files...]`) and literal references outside
+`docs/` (`--refs PATTERN`).
 
-## Limitações
+## Limitations
 
-- O `audit` verifica o conteúdo por leitura do modelo, por amostragem em
-  documentações grandes.
+- `audit` checks the content by reading against the template, by sampling in large
+  documentations.

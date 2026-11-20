@@ -1,9 +1,9 @@
 # Scripts
 
-Scripts de instalação e operação de {{PROJETO}} citados pelos guias de suporte. O
-uso de cada script é descrito no guia correspondente.
+Installation and operation scripts of {{PROJECT}} cited by the support guides. The
+usage of each script is described in the corresponding guide.
 
-## Por onde começar
+## Where to start
 
-Ainda não há scripts. A lista completa fica no [índice](.meta/index.md); as regras
-estão nas [regras do tópico](.meta/regras.md).
+There are no scripts yet. The full list is in the [index](.meta/index.md); the rules
+are in the [topic rules](.meta/rules.md).

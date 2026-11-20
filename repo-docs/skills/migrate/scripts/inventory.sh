@@ -1,31 +1,31 @@
 #!/usr/bin/env bash
-# inventory.sh: inventário de documentação, pendências no código e referências,
-# para a migração para a estrutura repo-docs. Só leitura: não altera nenhum arquivo.
+# inventory.sh: inventory of documentation, pending items in code and references,
+# for the migration to the repo-docs structure. Read-only: does not change any file.
 #
-# Uso, a partir da raiz do repositório:
+# Usage, from the repository root:
 #   inventory.sh --markdown [--docs DIR]
-#       Documentos de texto (.md, .markdown, .adoc, .rst) fora da documentação já
-#       estruturada; uma linha "MD <caminho> <linhas> <título>".
-#   inventory.sh --todos [--docs DIR] [arquivo...]
-#       Ocorrências de TODO e FIXME (palavra inteira, maiúsculas) nos arquivos
-#       informados ou, sem arquivos, em todos os arquivos do repositório; uma linha
-#       "TODO <caminho>:<linha>: <texto>".
-#   inventory.sh --refs PADRÃO [--docs DIR]
-#       Ocorrências literais de PADRÃO fora de DIR e de DIR-legado; uma linha
-#       "REF <caminho>:<linha>: <texto>".
+#       Text documents (.md, .markdown, .adoc, .rst) outside the already structured
+#       documentation; one line "MD <path> <lines> <title>".
+#   inventory.sh --todos [--docs DIR] [file...]
+#       Occurrences of TODO and FIXME (whole word, uppercase) in the given files
+#       or, without files, in all repository files; one line
+#       "TODO <path>:<line>: <text>".
+#   inventory.sh --refs PATTERN [--docs DIR]
+#       Literal occurrences of PATTERN outside DIR and DIR-legacy; one line
+#       "REF <path>:<line>: <text>".
 #
-# DIR é a pasta de documentação (padrão: docs). Ela só é excluída de --markdown e
-# --todos quando já está estruturada (DIR/.meta/regras.md existe). Pastas .git,
-# node_modules, bin e obj são sempre ignoradas, assim como arquivos binários.
-# A lista do repositório vem do git (rastreados e não rastreados não ignorados) ou,
-# fora de um repositório git, de todos os arquivos.
-# Saída em ordem de bytes do caminho e numérica da linha. Código de saída: 0, ou 2
-# em uso inválido. A saída é idêntica à de inventory.ps1.
+# DIR is the documentation folder (default: docs). It is only excluded from --markdown
+# and --todos when it is already structured (DIR/.meta/rules.md exists). The .git,
+# node_modules, bin and obj folders are always ignored, as are binary files.
+# The repository list comes from git (tracked, and untracked not ignored) or,
+# outside a git repository, from all files.
+# Output in byte order of the path and numeric order of the line. Exit code: 0, or 2
+# on invalid usage. The output is identical to that of inventory.ps1.
 
 set -u
 export LC_ALL=C
 
-usage() { echo "Uso: inventory.sh --markdown|--todos [arquivo...]|--refs PADRÃO [--docs DIR]" >&2; exit 2; }
+usage() { echo "Usage: inventory.sh --markdown|--todos [file...]|--refs PATTERN [--docs DIR]" >&2; exit 2; }
 
 mode=""
 pattern=""
@@ -47,12 +47,12 @@ docs="${docs#./}"
 docs="${docs%/}"
 
 structured=0
-[ -f "$docs/.meta/regras.md" ] && structured=1
+[ -f "$docs/.meta/rules.md" ] && structured=1
 
-# Normaliza um caminho: barras normais, sem "./" inicial.
+# Normalizes a path: forward slashes, no leading "./".
 norm() { local p="${1//\\//}"; p="${p#./}"; printf '%s' "$p"; }
 
-# Verdadeiro se o caminho deve ser ignorado.
+# True if the path must be ignored.
 excluded() {
     local p="/$1"
     case "$p" in
@@ -60,12 +60,12 @@ excluded() {
     esac
     case "$2" in
         docs) [ "$structured" -eq 1 ] && case "$1" in "$docs"/*) return 0 ;; esac ;;
-        refs) case "$1" in "$docs"/*|"$docs-legado"/*) return 0 ;; esac ;;
+        refs) case "$1" in "$docs"/*|"$docs-legacy"/*) return 0 ;; esac ;;
     esac
     return 1
 }
 
-# Lista os arquivos do repositório, um por linha.
+# Lists the repository files, one per line.
 all_files() {
     if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
         git -c core.quotepath=off ls-files --cached --others --exclude-standard
@@ -74,7 +74,7 @@ all_files() {
     fi
 }
 
-# Verdadeiro se o arquivo não é vazio e não tem byte nulo nos primeiros 8000 bytes.
+# True if the file is not empty and has no null byte in the first 8000 bytes.
 is_text() {
     [ -s "$1" ] || return 1
     [ "$(head -c 8000 "$1" | wc -c)" -eq "$(head -c 8000 "$1" | tr -d '\000' | wc -c)" ]

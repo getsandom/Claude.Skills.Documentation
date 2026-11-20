@@ -1,0 +1,4 @@
+# Index: history
+
+- **Updated:** {{DATE}}
+

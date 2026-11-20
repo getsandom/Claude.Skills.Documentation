@@ -1,0 +1,4 @@
+# Index: decisions
+
+- **Updated:** {{DATE}}
+

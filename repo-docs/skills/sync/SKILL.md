@@ -1,154 +1,154 @@
 ---
 name: sync
-description: Mantém a documentação repo-docs consistente ao criar, alterar, encerrar, mover ou renomear documentos em docs/ (próximo identificador, índice .meta/index.md, README do tópico, histórico do dia) e revisa os TODO/FIXME dos arquivos alterados contra as pendências. Use sempre que for registrar uma decisão, pendência, melhoria, requisito, tarefa ou outro documento em um repositório cuja pasta docs/ tenha .meta/regras.md, ao planejar ou executar os passos de uma tarefa, ou ao resolver uma pendência e revogar uma decisão.
-argument-hint: "[operação e documento] [--todos-completo]"
+description: Keeps the repo-docs documentation consistent when creating, changing, closing, moving or renaming documents in docs/ (next identifier, .meta/index.md index, topic README, history of the day) and reviews the TODO/FIXME of the changed files against the issues. Use whenever recording a decision, issue, improvement, requirement, task or other document in a repository whose docs/ folder has .meta/rules.md, when planning or executing the steps of a task, or when resolving an issue and revoking a decision.
+argument-hint: "[operation and document] [--all-todos]"
 ---
 
 # repo-docs: sync
 
-Aplica as regras da documentação a uma mudança em `docs/`, seja pedida pelo usuário
-(`$ARGUMENTS`), seja parte de outra tarefa.
+Applies the documentation rules to a change in `docs/`, whether requested by the
+user (`$ARGUMENTS`) or part of another task.
 
-Recursos do plugin:
+Plugin resources:
 
-- Próximo identificador e verificação: `${CLAUDE_PLUGIN_ROOT}/skills/audit/scripts/audit.sh`
-  e `audit.ps1`.
+- Next identifier and verification: `${CLAUDE_PLUGIN_ROOT}/skills/audit/scripts/audit.sh`
+  and `audit.ps1`.
 
-## 1. Regras
+## 1. Rules
 
-1. Leia `docs/.meta/regras.md` (regras gerais) e o `.meta/regras.md` do tópico
-   afetado, além do `.meta/modelo.md`, quando houver. As regras do tópico
-   prevalecem sobre as gerais.
-2. A pasta `.meta/` pode ser ignorada por buscas com Glob/Grep: leia os arquivos
-   pelo caminho explícito.
-3. Se não estiver claro em qual tópico o assunto se encaixa, use a seção O que
-   registrar das regras de cada tópico e, persistindo a dúvida, pergunte.
+1. Read `docs/.meta/rules.md` (general rules) and the `.meta/rules.md` of the
+   affected topic, as well as `.meta/template.md`, when there is one. The topic
+   rules prevail over the general ones.
+2. The `.meta/` folder may be ignored by Glob/Grep searches: read the files by their
+   explicit path.
+3. If it is not clear which topic the subject fits in, use the What to record
+   section of each topic's rules and, if the doubt persists, ask.
 
-## 2. Operações
+## 2. Operations
 
-### Criar documento
+### Create document
 
-1. Com identificador, obtenha o próximo número livre pelo script, a partir da raiz
-   do repositório:
+1. With an identifier, get the next free number with the script, from the
+   repository root:
    - `bash "${CLAUDE_PLUGIN_ROOT}/skills/audit/scripts/audit.sh" --next-id PRE docs`
    - `powershell -NoProfile -ExecutionPolicy Bypass -File "${CLAUDE_PLUGIN_ROOT}/skills/audit/scripts/audit.ps1" -NextId PRE docs`
-2. Nomeie o arquivo pelo campo **Nome do arquivo** e preencha o modelo; o título
-   começa pelo identificador (`# PRE_NNN: ...`).
-3. Ligue os documentos relacionados nos dois sentidos quando as regras pedirem
-   (por exemplo, **Detalha**/**Detalhado por** em requisitos).
+2. Name the file according to the **File name** field and fill in the template; the
+   title starts with the identifier (`# PRE_NNN: ...`).
+3. Link the related documents in both directions when the rules require it (for
+   example, **Details**/**Detailed by** in requirements).
 
-### Criar documento em pasta
+### Create folder document
 
-Quando o campo **Nome do arquivo** do tópico definir uma pasta por documento (por
-exemplo, tarefas), conforme a seção Documentos em pasta das regras gerais:
+When the **File name** field of the topic defines one folder per document (for
+example, tasks), according to the Folder documents section of the general rules:
 
-1. Siga a seção Antes de planejar (ou equivalente) das regras do tópico antes de
-   escrever qualquer arquivo.
-2. Obtenha o identificador como em Criar documento e crie a pasta
-   `PRE_NNN-titulo-curto/` com:
-   - `README.md` pelo modelo do tópico, com o título `# PRE_NNN: ...`;
-   - `.meta/regras.md` pelo modelo das regras da pasta, com o Identificador
+1. Follow the Before planning section (or equivalent) of the topic rules before
+   writing any file.
+2. Get the identifier as in Create document and create the folder
+   `PRE_NNN-short-title/` with:
+   - `README.md` from the topic template, with the title `# PRE_NNN: ...`;
+   - `.meta/rules.md` from the folder rules template, with the Identifier
      `` `PRE_NNN.XX` ``;
-   - `.meta/index.md` com os arquivos internos e os de apoio.
-3. Numere os arquivos internos pelo script, com o identificador da pasta:
+   - `.meta/index.md` with the inner files and the supporting files.
+3. Number the inner files with the script, using the folder identifier:
    - `bash "${CLAUDE_PLUGIN_ROOT}/skills/audit/scripts/audit.sh" --next-id PRE_NNN docs`
    - `powershell -NoProfile -ExecutionPolicy Bypass -File "${CLAUDE_PLUGIN_ROOT}/skills/audit/scripts/audit.ps1" -NextId PRE_NNN docs`
-4. A pasta entra no índice do tópico como subtópico
-   (`- [PRE_NNN-titulo/](../PRE_NNN-titulo/): Descrição.`).
+4. The folder goes into the topic index as a subtopic
+   (`- [PRE_NNN-title/](../PRE_NNN-title/): Description.`).
 
-### Alterar documento
+### Change document
 
-Edite o conteúdo para refletir o estado atual (sem acrescentar versões) e atualize
-**Atualizado em**. Se a descrição no índice deixar de estar correta, reescreva-a.
+Edit the content to reflect the current state (without adding versions) and update
+**Updated**. If the index description is no longer correct, rewrite it.
 
-Num documento em pasta, a mudança de um arquivo interno (por exemplo, o estado de um
-passo) atualiza também o `README.md` da pasta, como as regras do tópico pedirem
-(seção Passos e estado da tarefa), e a descrição da pasta no índice do tópico, se
-ela deixar de estar correta.
+In a folder document, a change to an inner file (for example, the state of a step)
+also updates the folder's `README.md`, as the topic rules require (Steps section and
+task state), and the folder description in the topic index, if it is no longer
+correct.
 
-### Encerrar documento
+### Close document
 
-Siga o campo **Ao encerrar** do tópico:
+Follow the **On closing** field of the topic:
 
-- **Seção Encerrados**: remova o arquivo e mova a linha para `## Encerrados` no fim
-  do índice (criando a seção se preciso), com o nome entre crases sem link e a
-  descrição iniciada pelo desfecho e pela data, em ordem numérica.
-- **Mover para subtópico** (ex.: pendência resolvida, tarefa concluída): preencha o
-  que as regras pedem (seção Resolução, seções Conclusão), mova o arquivo ou a
-  pasta, corrija os links relativos dele e os links de outros documentos para ele,
-  e mova a linha para o índice do subtópico com a descrição reescrita. Ao mover uma
-  pasta, a profundidade muda: corrija os links de todos os arquivos dela que saem
-  da pasta (inclusive os de `.meta/`).
-- **Remover**: remova o arquivo e a linha do índice.
+- **Closed section**: remove the file and move the line to `## Closed` at the end of
+  the index (creating the section if needed), with the name between backticks
+  without a link and the description starting with the outcome and the date, in
+  numeric order.
+- **Move to subtopic** (e.g. resolved issue, completed task): fill in what the rules
+  require (Resolution section, Conclusion sections), move the file or the folder,
+  fix its relative links and the links of other documents to it, and move the line
+  to the subtopic index with the description rewritten. When moving a folder, the
+  depth changes: fix the links of all its files that point outside the folder
+  (including those in `.meta/`).
+- **Remove**: remove the file and the index line.
 
-Em todos os casos, leve o conteúdo que continua valendo para onde ele passa a viver
-e corrija os links de outros documentos para o arquivo removido.
+In all cases, move the content that still applies to where it will live from then
+on and fix the links of other documents to the removed file.
 
-### Mover ou renomear
+### Move or rename
 
-Mova o arquivo, atualize os índices de origem e de destino e corrija os links que
-apontam para ele, inclusive no histórico.
+Move the file, update the source and destination indexes and fix the links that
+point to it, including in the history.
 
-## 3. Índice, README e histórico
+## 3. Index, README and history
 
-1. Atualize o `.meta/index.md` do tópico: um item por documento, no formato e no
-   tamanho das regras gerais, em ordem alfabética, e a data **Atualizado em**.
-2. Revise o `README.md` do tópico quando os documentos que ele destaca mudarem; ele
-   não lista todos os documentos.
-3. Se existir `docs/historico/`, registre criações, mudanças de conteúdo e remoções
-   no arquivo do dia (`AAAA-MM-DD.md`), conforme as regras do histórico, criando o
-   arquivo e o item no índice do histórico se preciso. Atualizações de índice e
-   correções de formatação não são registradas.
-4. Datas e horas vêm do relógio do sistema, nunca estimadas: `date +%d/%m/%Y`,
-   `date +%H:%M` e `date +%F` (bash) ou `Get-Date -Format dd/MM/yyyy`,
-   `Get-Date -Format HH:mm` e `Get-Date -Format yyyy-MM-dd` (PowerShell).
+1. Update the topic's `.meta/index.md`: one item per document, in the format and
+   length of the general rules, in alphabetical order, and the **Updated** date.
+2. Review the topic's `README.md` when the documents it highlights change; it does
+   not list all documents.
+3. If `docs/history/` exists, record creations, content changes and removals in the
+   file of the day (`YYYY-MM-DD.md`), according to the history rules, creating the
+   file and the item in the history index if needed. Index updates and formatting
+   fixes are not recorded.
+4. Dates and times come from the system clock, never estimated: `date +%F` and
+   `date +%H:%M` (bash) or `Get-Date -Format yyyy-MM-dd` and
+   `Get-Date -Format HH:mm` (PowerShell).
 
-## 4. Revisão de TODO e FIXME
+## 4. TODO and FIXME review
 
-Se existir o tópico `pendencias/`, revise as pendências anotadas no código. Há dois
-escopos:
+If the `issues/` topic exists, review the pending items noted in the code. There are
+two scopes:
 
-- **Arquivos alterados** (padrão, a cada execução): os arquivos de
-  `git diff --name-only HEAD` e `git ls-files --others --exclude-standard`. Fora de
-  um repositório git, este escopo é pulado.
-- **Repositório inteiro**: quando `$ARGUMENTS` contiver `--todos-completo` ou o
-  usuário pedir a revisão de todo o código. Pode ser executado sozinho, sem outra
-  operação de documento.
+- **Changed files** (default, on every run): the files from
+  `git diff --name-only HEAD` and `git ls-files --others --exclude-standard`. Outside
+  a git repository, this scope is skipped.
+- **Whole repository**: when `$ARGUMENTS` contains `--all-todos` or the user asks
+  for a review of all the code. It can be run on its own, without another document
+  operation.
 
-Passos:
+Steps:
 
-1. Liste as ocorrências com o script de inventário, a partir da raiz do
-   repositório. No escopo de arquivos alterados, passe os arquivos; no do
-   repositório inteiro, não passe nenhum:
-   - `bash "${CLAUDE_PLUGIN_ROOT}/skills/migrate/scripts/inventory.sh" --todos [arquivos...]`
-   - `powershell -NoProfile -ExecutionPolicy Bypass -File "${CLAUDE_PLUGIN_ROOT}/skills/migrate/scripts/inventory.ps1" -Todos [arquivos...]`
-2. Compare com a seção Itens das pendências abertas (`docs/pendencias/*.md`), pelo
-   arquivo e pelo texto do comentário (a linha pode ter mudado):
-   - ocorrência que nenhuma pendência cita: proponha registrá-la, como item de uma
-     pendência existente do mesmo assunto ou numa pendência nova, no formato
-     `` - `caminho:linha`: `texto` ``, em que `texto` é a linha exatamente como o
-     script a imprime (sem corrigir grafia nem acentos), opcionalmente seguida de
-     "; efeito: ..." com o efeito no sistema;
-   - item de pendência cujo comentário não existe mais no arquivo citado: aponte-o
-     e proponha atualizar a pendência (ou resolvê-la, se não restar item). No
-     escopo de arquivos alterados, verifique só os itens que citam esses arquivos;
-     no do repositório inteiro, todos os itens de todas as pendências abertas;
-   - item cuja linha mudou: proponha atualizar o número da linha.
-3. No repositório inteiro, apresente primeiro um resumo (ocorrências não
-   registradas por pasta, itens sem comentário, linhas desatualizadas) e proponha
-   os registros agrupados por assunto, para aprovação em bloco ou por grupo.
-   Ocorrências triviais ou obsoletas podem ser deixadas de fora, com aprovação.
-4. Registre só com aprovação. O código não é alterado: o comentário permanece e a
-   pendência indica onde ele está.
+1. List the occurrences with the inventory script, from the repository root. In the
+   changed files scope, pass the files; in the whole repository scope, pass none:
+   - `bash "${CLAUDE_PLUGIN_ROOT}/skills/migrate/scripts/inventory.sh" --todos [files...]`
+   - `powershell -NoProfile -ExecutionPolicy Bypass -File "${CLAUDE_PLUGIN_ROOT}/skills/migrate/scripts/inventory.ps1" -Todos [files...]`
+2. Compare with the Items section of the open issues (`docs/issues/*.md`), by file
+   and by comment text (the line may have changed):
+   - occurrence that no issue cites: propose recording it, as an item of an existing
+     issue on the same subject or in a new issue, in the format
+     `` - `path:line`: `text` ``, where `text` is the line exactly as the script
+     prints it (without fixing spelling or accents), optionally followed by
+     "; effect: ..." with the effect on the system;
+   - issue item whose comment no longer exists in the cited file: point it out and
+     propose updating the issue (or resolving it, if no item remains). In the
+     changed files scope, check only the items that cite those files; in the whole
+     repository scope, all items of all open issues;
+   - item whose line changed: propose updating the line number.
+3. In the whole repository, first present a summary (unrecorded occurrences per
+   folder, items without a comment, outdated lines) and propose the records grouped
+   by subject, for approval as a block or per group. Trivial or obsolete occurrences
+   may be left out, with approval.
+4. Record only with approval. The code is not changed: the comment stays and the
+   issue indicates where it is.
 
-## 5. Verificação
+## 5. Verification
 
-Ao terminar, execute a verificação mecânica e corrija o que for apontado:
+When finished, run the mechanical verification and fix whatever is reported:
 
 - `bash "${CLAUDE_PLUGIN_ROOT}/skills/audit/scripts/audit.sh" docs`
 - `powershell -NoProfile -ExecutionPolicy Bypass -File "${CLAUDE_PLUGIN_ROOT}/skills/audit/scripts/audit.ps1" docs`
 
-Informe os arquivos criados, alterados e removidos e o identificador usado. Não faça
-commit sem pedido; quando o usuário pedir, a mensagem segue o item "Mensagens de
-commit" das Convenções das regras gerais e cita o identificador. Se o item não
-existir, pergunte o padrão ao usuário, como no `init`, e proponha acrescentá-lo.
+Report the files created, changed and removed and the identifier used. Do not commit
+without being asked; when the user asks, the message follows the "Commit messages"
+item of the Conventions of the general rules and cites the identifier. If the item
+does not exist, ask the user for the pattern, as in `init`, and propose adding it.
