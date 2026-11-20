@@ -1,0 +1,15 @@
+{
+	"name": "claude-documentation",
+	"description": "Plugins do Claude Code para documentação de projetos da Claude.",
+	"owner": {
+		"name": "Claude"
+	},
+	"plugins": [
+		{
+			"name": "repo-docs",
+			"source": "./repo-docs",
+			"description": "Documentação embutida e versionada no repositório, organizada em tópicos com índice, regras e modelos.",
+			"version": "0.2.0"
+		}
+	]
+}
